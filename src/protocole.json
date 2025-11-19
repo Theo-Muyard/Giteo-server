@@ -1,0 +1,17 @@
+{
+	"commands":
+	{
+		"help":
+		{
+			"names": ["help", "--help"],
+			"description": "Affiche une interface d'aide sur le fonctionnement de giteo-server et de ses commandes.",
+			"exec": "./bin/commands/help.c"
+		},
+		"setup":
+		{
+			"names": ["setup", "--setup"],
+			"description": "Initialise le systeme sur la machine via un setup.",
+			"exec": "./bin/commands/setup.c"
+		}
+	}
+}
