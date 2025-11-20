@@ -8,6 +8,8 @@
 # include <stdlib.h>
 # include <unistd.h>
 # include <sys/wait.h>
+# include <cJSON/cJSON.h>
+# include <string.h>
 
 /*
 ==> COLORS
@@ -47,5 +49,15 @@
  * @return A string with all content of the file or NULL if an error was occured
  */
 char	*load_file(const char *path);
+
+
+int		commands_handler(char *path, char *command, char **argv);
+
+
+void	exec_command(char *path, char **argv);
+
+cJSON	*load_protocole(void);
+
+cJSON	*find_command(cJSON *commands, const char *name);
 
 #endif
