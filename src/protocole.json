@@ -4,14 +4,14 @@
 		"help":
 		{
 			"names": ["help", "--help", "aide"],
-			"description": "Affiche une interface d'aide sur le fonctionnement de giteo-server et de ses commandes.",
+			"description": "Displays a comprehensive help interface for giteo-server.\n\tIt provides detailed information about the available commands, their usage, and examples,\n\thelping users understand how to operate the server efficiently.",
 			"usage": "giteo-server --help <command>",
 			"exec": "bin/commands/help"
 		},
 		"setup":
 		{
-			"names": ["setup", "--setup"],
-			"description": "Initialise le systeme sur la machine via un setup.",
+			"names": ["setup", "--setup", "set", "--set"],
+			"description": "Runs the setup procedure to initialize the system for giteo-server.\n\tThis command ensures that all necessary configurations, directories,\n\tand default files are properly created, allowing the server to function correctly on your machine.",
 			"usage": "giteo-server --setup",
 			"exec": "bin/commands/setup"
 		}
