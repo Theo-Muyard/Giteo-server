@@ -6,5 +6,5 @@
 	Makefile
 	Dossiers / Architecture
 	Parsing des options / commandes
-- [] Systeme d'installation (perms)
+- [ ] Systeme d'installation (perms)
 	Install.sh
