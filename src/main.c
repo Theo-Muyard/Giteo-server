@@ -8,7 +8,7 @@ int	main(int argc, char **argv)
 		return (1);
 	}
 
-	if (1 == commands_handler("src/protocole.json", argv[1], argv))
+	if (1 == commands_handler(argv[1], argv))
 		return (1);
 	return (0);
 }

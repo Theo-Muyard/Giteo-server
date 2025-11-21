@@ -1,4 +1,5 @@
-#include "main.h"
+#include "tools_json.h"
+#include "tools_helper.h"
 
 char	*load_file(const char *path)
 {
@@ -35,37 +36,30 @@ cJSON	*load_protocole(void)
 
 	_json_content = load_file("src/protocole.json");
 	if (NULL == _json_content)
-	{
-		printf("%s[ERROR]%s An error occured : LOAD JSON FAILED.\n", RED, WHITE);
-		return (NULL);
-	}
+		return (printf("%s[ERROR]%s An error occured : LOAD JSON FAILED.\n", RED, WHITE), NULL);
 
 	_root = cJSON_Parse(_json_content);
 	if (NULL == _root)
-	{
-		printf("%s[ERROR]%s An error occured : PARSE JSON FAILED.\n", RED, WHITE);
-		free(_json_content);
-		return (NULL);
-	}
+		return (free(_json_content), print_parse_error("root"), NULL);
 
 	free(_json_content);
 	return (_root);
 }
 
-cJSON	*find_command(cJSON *commands, const char *name)
+cJSON	*find_command(const cJSON *commands, const char *alias)
 {
 	cJSON	*_cmd;
 	cJSON	*_command_aliases;
-	cJSON	*_command_alias;
+	cJSON	*_alias;
 
 	cJSON_ArrayForEach(_cmd, commands)
 	{
-		_command_aliases = cJSON_GetObjectItem(_cmd, "names");
+		_command_aliases = cJSON_GetObjectItem(_cmd, "aliases");
 		if (NULL == _command_aliases)
 			continue;
-		cJSON_ArrayForEach(_command_alias, _command_aliases)
+		cJSON_ArrayForEach(_alias, _command_aliases)
 		{
-			if (0 == strcmp(_command_alias->valuestring, name))
+			if (0 == strcmp(_alias->valuestring, alias))
 				return (_cmd);
 		}
 	}

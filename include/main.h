@@ -1,9 +1,10 @@
 #ifndef GITEO_MAIN_H
 # define GITEO_MAIN_H
 
-/*
-==> INCLUDES
-*/
+// ======================================>
+// =============== INCLUDES ==============
+// ======================================>
+
 # include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
@@ -11,9 +12,10 @@
 # include <cJSON/cJSON.h>
 # include <string.h>
 
-/*
-==> COLORS
-*/
+
+// ======================================>
+// ================ COLORS ===============
+// ======================================>
 
 # define BLACK            "\033[30m"
 # define RED            "\033[31m"
@@ -24,9 +26,9 @@
 # define CYAN            "\033[36m"
 # define WHITE            "\033[37m"
 
-/*
-==> FORMATTING
-*/
+// ======================================>
+// ============== Formating ==============
+// ======================================>
 
 # define RESET            "\033[0m"
 # define BOLD            "\033[1m"
@@ -39,25 +41,15 @@
 # define HIDDEN            "\033[8m"
 # define STRIKETHROUGH    "\033[9m"
 
-/*
-==> Functions
-*/
+// ======================================>
+// ============== FUNCTIONS ==============
+// ======================================>
 
 /**
- * @brief Load a file content
- * @param Path The path of the file
- * @return A string with all content of the file or NULL if an error was occured
+ * @brief Handle the commands
+ * @param command The command to execute
+ * @param argv All arguments without the first and NULL terminated
  */
-char	*load_file(const char *path);
-
-
-int		commands_handler(char *path, char *command, char **argv);
-
-
-void	exec_command(char *path, char **argv);
-
-cJSON	*load_protocole(void);
-
-cJSON	*find_command(cJSON *commands, const char *name);
+int		commands_handler(const char *command, char **argv);
 
 #endif

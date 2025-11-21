@@ -15,15 +15,16 @@ YELLOW			=	\033[33m
 
 # COMPILER
 CC				=	cc
-CFLAGS			=	-Wall -Wextra -Werror -I./include
+CFLAGS			=	-Wall -Wextra -Werror -I./include -I./include/tools/json -I./include/tools/helper
 LDFLAGS			=	-L./include/cJSON/build -lcjson
 
-# export LD_LIBRARY_PATH=$(pwd)/include/cJSON/build:$LD_LIBRARY_PATH
+# export LD_LIBRARY_PATH=/home/tmuyard/Giteo/Giteo-server/include/cJSON/build:$LD_LIBRARY_PATH
 
 # GITEO-SERVER SOURCE
 SRC				=	src/main.c \
-					src/utilities/json/tools_json.c \
-					src/utilities/commands_handler.c \
+					src/tools/json/tools_json.c \
+					src/tools/commands_handler.c \
+					src/tools/helper/messages.c
 					# ...
 SRC_OBJ			=	$(SRC:src/%.c=$(OBJ_FOLDER)/%.o)
 
@@ -32,7 +33,8 @@ SRC_COMMANDS	=	src/commands/setup.c \
 					src/commands/help.c \
 					# ...
 COMMANDS		=	$(SRC_COMMANDS:src/commands/%.c=$(BIN_FOLDER)/commands/%)
-COMMANDS_HELPER	=	src/utilities/json/tools_json.c \
+COMMANDS_HELPER	=	src/tools/json/tools_json.c \
+					src/tools/helper/messages.c
 					# ...
 
 all: $(NAME) $(COMMANDS)
