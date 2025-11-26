@@ -31,10 +31,14 @@ char	*load_file(const char *path)
 
 cJSON	*load_protocole(void)
 {
+	char	*_file_path;
+	char	_buff[PATH_MAX];
 	char	*_json_content;
 	cJSON	*_root;
 
-	_json_content = load_file("src/protocole.json");
+	_file_path = get_real_path("settings/protocole.json", _buff);
+
+	_json_content = load_file(_file_path);
 	if (NULL == _json_content)
 		return (printf("%s[ERROR]%s An error occured : LOAD JSON FAILED.\n", RED, WHITE), NULL);
 

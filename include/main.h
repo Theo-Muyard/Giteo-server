@@ -11,7 +11,7 @@
 # include <sys/wait.h>
 # include <cJSON/cJSON.h>
 # include <string.h>
-
+# include <limits.h>
 
 // ======================================>
 // ================ COLORS ===============

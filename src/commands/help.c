@@ -67,7 +67,7 @@ static int display_pannel(const cJSON *root, const char *command)
 
 	if (NULL == command)
 	{
-		printf("\n%s\n\n", ASCII_TITLE);
+		// printf("\n%s\n\n", ASCII_TITLE);
 
 		printf("Here are all commands of %sgiteo-server%s, manager of your %shome git%s.\n\n", BLUE, WHITE, YELLOW, WHITE);
 		cJSON_ArrayForEach(_cmd, _commands)
@@ -81,7 +81,7 @@ static int display_pannel(const cJSON *root, const char *command)
 	_cmd = find_command(_commands, command);
 	if (NULL == _cmd)
 		return (printf("%s[ERROR]%s Command not found.\nUse --help for more info.\n", RED, WHITE), 1);
-	printf("\n%s\n\n", ASCII_TITLE);
+	// printf("\n%s\n\n", ASCII_TITLE);
 	printf("Specific help for %s%s%s:\n\n", BLUE, command, WHITE);
 	
 	if (1 == print_command(_cmd))

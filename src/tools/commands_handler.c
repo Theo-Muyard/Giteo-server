@@ -11,9 +11,12 @@ static void	exec_command(const char *path, char **argv)
 {
 	pid_t	_pid;
 	int		_state;
+	char	*_final_path;
+	char	_buff[PATH_MAX];
 
 	_pid = fork();
 	_state = 0;
+	_final_path = get_real_path(path, _buff);
 
 	if (-1 == _pid)
 	{
@@ -22,7 +25,7 @@ static void	exec_command(const char *path, char **argv)
 	}
 	else if (0 == _pid)
 	{
-		execv(path, argv);
+		execv(_final_path, argv);
 		perror("execv");
 		exit (1);
 	}
