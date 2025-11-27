@@ -4,7 +4,7 @@
 CC					=	cc
 CFLAGS				=	-Wall -Wextra -Werror -I./include -I./include/tools/json -I./include/tools/helper
 LDFLAGS				=	-L./include/cJSON/build -lcjson -Wl,-rpath,'$$ORIGIN/../libs'
-LDFLAGS_COMMANDS	=	-L./include/cJSON/build -lcjson -Wl,-rpath,'$$ORIGIN/../../libs'
+LDFLAGS_COMMANDS	=	-L./include/cJSON/build -lcrypto -lcjson -Wl,-rpath,'$$ORIGIN/../../libs'
 NAME				=	giteo-server
 
 BIN_FOLDER			=	bin
@@ -19,21 +19,22 @@ MAGENTA				=	\033[35m
 YELLOW				=	\033[33m
 
 SRC					=	src/main.c \
-					src/tools/json/tools_json.c \
-					src/tools/commands_handler.c \
-					src/tools/helper/messages.c \
-					src/tools/helper/path.c \
-					# ...
+						src/tools/json/tools_json.c \
+						src/tools/commands_handler.c \
+						src/tools/helper/messages.c \
+						src/tools/helper/path.c \
+						# ...
 SRC_OBJ				=	$(SRC:src/%.c=$(OBJ_FOLDER)/%.o)
 
 SRC_COMMANDS		=	src/commands/setup.c \
-					src/commands/help.c \
-					# ...
+						src/commands/help.c \
+						src/commands/adduser.c \
+						# ...
 COMMANDS			=	$(SRC_COMMANDS:src/commands/%.c=$(BIN_FOLDER)/commands/%)
 COMMANDS_HELPER		=	src/tools/json/tools_json.c \
-					src/tools/helper/messages.c \
-					src/tools/helper/path.c \
-					# ...
+						src/tools/helper/messages.c \
+						src/tools/helper/path.c \
+						# ...
 
 all: $(NAME) $(COMMANDS)
 

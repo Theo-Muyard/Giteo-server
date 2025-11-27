@@ -29,6 +29,21 @@ char	*load_file(const char *path)
 	return (buffer);
 }
 
+int		write_JSON_file(char *buffer, char *path)
+{
+	char	_buff[PATH_MAX];
+	char	*_real_path;
+	FILE	*_file;
+
+	_real_path = get_real_path(path, _buff);
+	_file = fopen(_real_path, "w");
+	if (NULL == _file)
+		return (1);
+	if (0 > fprintf(_file, "%s", buffer))
+		return (1);
+	return (0);
+}
+
 cJSON	*load_protocole(void)
 {
 	char	*_file_path;

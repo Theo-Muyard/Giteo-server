@@ -28,6 +28,8 @@
  */
 char	*load_file(const char *path);
 
+int		write_JSON_file(char *buffer, char *path);
+
 /**
  * @brief Load and parse the JSON protocole file
  * @return The JSON parsed with cJSON or NULL if an error was occured

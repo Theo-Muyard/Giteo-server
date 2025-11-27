@@ -4,6 +4,7 @@ char	*get_real_path(const char *path, char *buffer)
 {
 	char	*_home_path;
 
+	buffer[0] = '\0';
 	_home_path = getenv("HOME");
 	if (NULL == _home_path)
 		return (NULL);

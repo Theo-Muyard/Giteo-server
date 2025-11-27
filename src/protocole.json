@@ -19,8 +19,8 @@
 		{
 			"aliases": ["adduser", "--adduser", "addu", "--addu"],
 			"description": "This command registers a new account in the server's configuration database, initializes the user’s directory structure, and prepares the workspace according to your server policies.\nIt ensures the user is properly integrated into the permission system and ready to interact with repositories managed by giteo-server.\nUse this command whenever you want to create a new contributor with access to your local Git environment.",
-			"usage": "giteo-server --adduser <user>",
-			"exec": ""
+			"usage": "giteo-server --adduser",
+			"exec": "bin/commands/adduser"
 		},
 		"removeuser":
 		{
