@@ -59,5 +59,5 @@ int		commands_handler(const char *alias, char **argv)
 
 	exec_command(_command_file_exec->valuestring, argv + 1);
 	cJSON_Delete(_root);
-	return (1);
+	return (0);
 }
