@@ -2,7 +2,7 @@
 
 UNINSTALL_DIR="$HOME/.giteo-server"
 
-if [ "$SHELL" = "/bin/zsh" ]; then
+if [ $(basename "$SHELL") = "zsh" ]; then
 	RC="$HOME/.zshrc"
 else
 	RC="$HOME/.bashrc"

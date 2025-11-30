@@ -1,57 +1,62 @@
-#include "main.h"
-#include "tools_json.h"
-#include "tools_helper.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <limits.h>
 
-#define SALT_LEN 16
-#define HASH_LEN 64
+#include "fs.h"
+#include "log.h"
+#include "json_store.h"
+#include "process.h"
+#include "core/paths.h"
 
-static int	create_files(void)
+static int	create_file(char *path)
 {
-	FILE	*_config_f;
-	FILE	*_users_f;
-	char	_buff[PATH_MAX];
-	char	*_real_path;
+	FILE	*_file;
 
-	_real_path = get_real_path("settings/config.json", _buff);
-	_config_f = fopen(_real_path, "r");
+	_file = fopen(path, "r");
 
-	_real_path = get_real_path("settings/users.json", _buff);
-	_users_f = fopen(_real_path, "r");
-
-	if (NULL != _config_f && NULL != _users_f)
-		return (1);
-
-	_users_f = fopen(_real_path, "w");
-	fprintf(_users_f, "{}");
-	_real_path = get_real_path("settings/config.json", _buff);
-	_config_f = fopen(_real_path, "w");
-	fprintf(_config_f, "{}");
-
-	if (NULL == _config_f || NULL == _users_f)
+	if (NULL != _file)
 	{
-		perror("fopen");
+		fclose(_file);
 		return (1);
 	}
 
-	fclose(_config_f);
-	fclose(_users_f);
+	_file = fopen(path, "w");
+	if (NULL == _file)
+		return (perror("fopen"), 1);
+	fprintf(_file, "{}");
+	
+	fclose(_file);
 	return (0);
 }
 
-int	main(int argc, char **argv)
+int	main(void)
 {
-	(void)argc;
-	(void)argv;
-
 	// cJSON	*_root;
+	char	_path[PATH_MAX];
 
-	if (1  == create_files())
+	giteo_settings_path("users.json", _path);
+	if (!fs_file_exists(_path))
+		create_file(_path);
+
+	giteo_settings_path("config.json", _path);
+	if (fs_file_exists(_path))
+		return (log_error("The system is already etablished."), 1);
+
+	printf("Welcome on our setup system!\nNow, create your first user.\n\n");
+	giteo_bin_path("/commands/adduser", _path);
+	if (1 == process_exec(_path, (char **){NULL}))
 	{
-		printf("The system is already etablished.\n");
+		printf("ERROR\n");
 		return (1);
 	}
-
-	printf("The system has been created or updated successfully.\n");
+	giteo_settings_path("config.json", _path);
+	if (1 == create_file(_path))
+	{
+		printf("CREATE FILE ERROR \n");
+		return (1);
+	}
+	log_success("The system has been created or updated successfully.");
 
 	return (0);
 }

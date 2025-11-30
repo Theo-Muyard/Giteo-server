@@ -1,10 +1,17 @@
-#include "main.h"
+#include <stdio.h>
+#include "commands_handler.h"
+#include "log.h"
+
+#define RED		"\033[31m"
+#define BLUE	"\033[34m"
+#define WHITE	"\033[37m"
 
 int	main(int argc, char **argv)
 {
 	if (argc == 1)
 	{
-		printf("%s[ERROR]%s Missing arguments.\nUse %sgiteo-server --help%s for more informations.\n", RED, WHITE, BLUE, WHITE);
+		log_error("Missing arguments.\n, \
+				Use %sgiteo-server --help%s for more informations.", BLUE, WHITE);
 		return (1);
 	}
 

@@ -24,11 +24,11 @@ make -s
 
 cp bin/giteo-server "$BIN_DIR"
 cp -r bin/commands/ "$BIN_DIR/commands"
-cp src/protocole.json "$SETTINGS_DIR/protocole.json"
+cp protocole.json "$SETTINGS_DIR/protocole.json"
 
 make -s fclean
 
-if [ "$SHELL" = "/bin/zsh" ]; then
+if [ $(basename "$SHELL") = "zsh" ]; then
 	RC="$HOME/.zshrc"
 else
 	RC="$HOME/.bashrc"

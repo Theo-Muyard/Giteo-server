@@ -6,21 +6,21 @@
 			"aliases": ["help", "--help", "aide"],
 			"description": "Displays a comprehensive help interface for giteo-server.\n\tIt provides detailed information about the available commands, their usage, and examples,\n\thelping users understand how to operate the server efficiently.",
 			"usage": "giteo-server --help <command>",
-			"exec": "bin/commands/help"
+			"exec": "commands/help"
 		},
 		"setup":
 		{
 			"aliases": ["setup", "--setup", "set", "--set"],
 			"description": "Runs the setup procedure to initialize the system for giteo-server.\n\tThis command ensures that all necessary configurations, directories,\n\tand default files are properly created, allowing the server to function correctly on your machine.",
 			"usage": "giteo-server --setup",
-			"exec": "bin/commands/setup"
+			"exec": "commands/setup"
 		},
 		"adduser":
 		{
 			"aliases": ["adduser", "--adduser", "addu", "--addu"],
 			"description": "This command registers a new account in the server's configuration database, initializes the user’s directory structure, and prepares the workspace according to your server policies.\nIt ensures the user is properly integrated into the permission system and ready to interact with repositories managed by giteo-server.\nUse this command whenever you want to create a new contributor with access to your local Git environment.",
 			"usage": "giteo-server --adduser",
-			"exec": "bin/commands/adduser"
+			"exec": "commands/adduser"
 		},
 		"removeuser":
 		{

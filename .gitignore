@@ -57,3 +57,5 @@ dkms.conf
 # Bin / Objs
 obj/
 bin/
+
+.vscode/

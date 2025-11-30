@@ -1,9 +1,18 @@
-#include "main.h"
-#include "tools_json.h"
-#include "tools_helper.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <termios.h>
 #include <openssl/rand.h>
 #include <openssl/evp.h>
+#include <time.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <string.h>
+
+#include "core/paths.h"
+#include "log.h"
+#include "fs.h"
+#include "process.h"
+#include "json_store.h"
 
 #define SALT_LEN 16
 #define HASH_LEN 64
@@ -52,69 +61,118 @@ static void	to_hex(const unsigned char *input, size_t len, char *output)
 	output[len * 2] = '\0';
 }
 
-int	main(void)
+static int	hash_password(char *password, char *hex_password, char *hex_salt)
 {
-	char			_username[256];
-	char			_password[256];
-
 	unsigned char	_salt[SALT_LEN];
 	unsigned char	_hash[HASH_LEN];
 
-	char			_hex_password[512];
-
-	char			*_buffer_content;
-	char			_buff[PATH_MAX];
-	char			*_real_path;
-	
-	char			*_out;
-
-	cJSON			*_root;
-	cJSON			*_new_user;
-
-	_real_path = get_real_path("settings/users.json", _buff);
-	_buffer_content = load_file(_real_path);
-
-	_root = cJSON_Parse(_buffer_content);
-	if (NULL == _root)
-		return (print_parse_error("root"), 1);
-
-	get_input(_username, sizeof(_username), "Enter a username: ", 0);
-	get_input(_password, sizeof(_password), "Enter a password: ", 1);
-
-	printf("\n\nUSERNAME: %s\n", _username);
-	printf("PASSWORD: %s\n", _password);
-
 	if (0 == RAND_bytes(_salt, SALT_LEN))
-	{
-		perror("RAND bytes");
-		return (1);
-	}
+		return (log_error("Internal error: RAND BYTES"), 1);
 
 	if (0 == PKCS5_PBKDF2_HMAC(
-		_password, strlen(_password),
+		password, strlen(password),
 		_salt, SALT_LEN,
 		310000,
 		EVP_sha512(),
 		HASH_LEN,
 		_hash
 	))
-	{
-		perror("PKCS5");
-		return (1);
-	}
+		return (log_error("Internal error: PKCS5"), 1);
 
-	to_hex(_hash, sizeof(_hash), _hex_password);
-	explicit_bzero(_password, sizeof(_password));
+	to_hex(_hash, sizeof(_hash), hex_password);
+	to_hex(_salt, sizeof(_salt), hex_salt);
+	return (0);
+}
 
+static int	add_to_json_file(cJSON *root, char *username, char *hex_pasword, char *hex_salt)
+{
+	cJSON			*_new_user;
+	time_t			_timestamp;
+	char			_uuid[32];
+	char			_path[PATH_MAX];
+
+	giteo_settings_path("users.json", _path);
+	_timestamp = time(NULL);
+	sprintf(_uuid, "%ld", _timestamp);
 	_new_user = cJSON_CreateObject();
-	cJSON_AddStringToObject(_new_user, "username", _username);
-	cJSON_AddStringToObject(_new_user, "password", _hex_password);
-	cJSON_AddItemToObject(_root, "<user_id>", _new_user);
+	cJSON_AddStringToObject(_new_user, "username", username);
+	cJSON_AddStringToObject(_new_user, "password", hex_pasword);
+	cJSON_AddStringToObject(_new_user, "salt", hex_salt);
+	cJSON_AddItemToObject(root, _uuid, _new_user);
 
-	_out = cJSON_Print(_root);
+	json_save(_path, root);
+	return (0);
+}
 
-	write_JSON_file(_out, "/settings/users.json");
+static int	check_valid_input(char *input)
+{
+	if (NULL == input || input[0] == '\0')
+		return (1);
 
+	while (*input)
+	{
+		if (!isspace((unsigned char)*input))
+			return (0);
+		++input;
+	}
+	return (1);
+}
+
+static int	check_valid_username(cJSON *root, char *username)
+{
+	cJSON			*_user;
+
+	if (check_valid_input(username))
+		return (1);
+
+	cJSON_ArrayForEach(_user, root)
+	{
+		if (0 == strcmp(username, cJSON_GetObjectItem(_user, "username")->valuestring))
+			return (1);
+	}
+	return (0);
+}
+
+int	main(void)
+{
+	char			_username[256];
+	char			_password[256];
+	char			_hex_password[512];
+	char			_hex_salt[512];
+
+	char			*_buffer_content;
+	char			_real_path[PATH_MAX];
+	
+	cJSON			*_root;
+
+	giteo_settings_path("users.json", _real_path);
+
+	_buffer_content = fs_read_file(_real_path);
+	if (NULL == _buffer_content)
+		return (log_warning("Please setup the system before use this command."), 1);
+
+	_root = cJSON_Parse(_buffer_content);
+	if (NULL == _root)
+		return (log_error("JSON parse failed."), 1);
+
+	get_input(_username, sizeof(_username), "Enter a username: ", 0);
+
+	if (check_valid_username(_root, _username))
+		return (log_error("Invalid username. Please try again."), 1);
+
+	get_input(_password, sizeof(_password), "Enter a password: ", 1);
+	printf("\n");
+
+	if (check_valid_input(_password))
+		return (log_error("Invalid password. Please try again."), 1);
+
+	if (1 == hash_password(_password, _hex_password, _hex_salt))
+		return(log_error("Internal error: password hashage."), 1);
+
+	add_to_json_file(_root, _username, _hex_password, _hex_salt);
+	log_success("User added.");
+
+	explicit_bzero(_password, sizeof(_password));
 	cJSON_Delete(_root);
 	free(_buffer_content);
 	return (0);

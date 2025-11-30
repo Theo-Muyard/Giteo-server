@@ -1,19 +1,17 @@
-#include "main.h"
-#include "tools_json.h"
-#include "tools_helper.h"
+#include <stdio.h>
+#include <limits.h>
+#include "json_store.h"
+#include "log.h"
+#include "core/paths.h"
 
-#define ASCII_TITLE \
-" █████   █████          ████               ███████████                                           ████ \n" \
-"▒▒███   ▒▒███          ▒▒███              ▒▒███▒▒▒▒▒███                                         ▒▒███ \n" \
-" ▒███    ▒███   ██████  ▒███  ████████     ▒███    ▒███  ██████   ████████   ████████    ██████  ▒███ \n" \
-" ▒███████████  ███▒▒███ ▒███ ▒▒███▒▒███    ▒██████████  ▒▒▒▒▒███ ▒▒███▒▒███ ▒▒███▒▒███  ███▒▒███ ▒███ \n" \
-" ▒███▒▒▒▒▒███ ▒███████  ▒███  ▒███ ▒███    ▒███▒▒▒▒▒▒    ███████  ▒███ ▒███  ▒███ ▒███ ▒███████  ▒███ \n" \
-" ▒███    ▒███ ▒███▒▒▒   ▒███  ▒███ ▒███    ▒███         ███▒▒███  ▒███ ▒███  ▒███ ▒███ ▒███▒▒▒   ▒███ \n" \
-" █████   █████▒▒██████  █████ ▒███████     █████       ▒▒████████ ████ █████ ████ █████▒▒██████  █████\n" \
-"▒▒▒▒▒   ▒▒▒▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒  ▒███▒▒▒     ▒▒▒▒▒         ▒▒▒▒▒▒▒▒ ▒▒▒▒ ▒▒▒▒▒ ▒▒▒▒ ▒▒▒▒▒  ▒▒▒▒▒▒  ▒▒▒▒▒ \n" \
-"                              ▒███                                                                    \n" \
-"                              █████                                                                   \n" \
-"                             ▒▒▒▒▒                                                                    \n" \
+# define RESET	"\033[0m"
+# define BOLD	"\033[1m"
+# define ITALIC	"\033[3m"
+# define RED	"\033[31m"
+# define GREEN	"\033[32m"
+# define YELLOW	"\033[33m"
+# define BLUE	"\033[34m"
+# define WHITE	"\033[37m"
 
 /**
  * @brief Print a command with help format
@@ -33,7 +31,7 @@ static int	print_command(const cJSON *cmd)
 	_description = cJSON_GetObjectItem(cmd, "description");
 	_usage = cJSON_GetObjectItem(cmd, "usage");
 	if (NULL == _aliases || NULL == _description || NULL == _usage)
-		return(print_parse_error("aliases, description or usage"), 1);
+		return(log_error("parse JSON aliases, description or usage failed."), 1);
 
 	_first = 1;
 	printf("\n%s%s%s: %s\t[", BOLD, RED, cmd->string, RESET);
@@ -63,12 +61,10 @@ static int display_pannel(const cJSON *root, const char *command)
 
 	_commands = cJSON_GetObjectItem(root, "commands");
 	if (NULL == _commands)
-		return (print_parse_error("commands"), 1);
+		return (log_error("parse JSON commands."), 1);
 
 	if (NULL == command)
 	{
-		// printf("\n%s\n\n", ASCII_TITLE);
-
 		printf("Here are all commands of %sgiteo-server%s, manager of your %shome git%s.\n\n", BLUE, WHITE, YELLOW, WHITE);
 		cJSON_ArrayForEach(_cmd, _commands)
 		{
@@ -81,7 +77,7 @@ static int display_pannel(const cJSON *root, const char *command)
 	_cmd = find_command(_commands, command);
 	if (NULL == _cmd)
 		return (printf("%s[ERROR]%s Command not found.\nUse --help for more info.\n", RED, WHITE), 1);
-	// printf("\n%s\n\n", ASCII_TITLE);
+
 	printf("Specific help for %s%s%s:\n\n", BLUE, command, WHITE);
 	
 	if (1 == print_command(_cmd))
@@ -94,8 +90,10 @@ int	main(int argc, const char **argv)
 	(void)argc;
 
 	cJSON	*_root;
+	char	_path[PATH_MAX];
 
-	_root = load_protocole();
+	giteo_settings_path("protocole.json", _path);
+	_root = json_load(_path);
 	if (NULL ==_root)
 		return (1);
 	if (1 == display_pannel(_root, argv[1]))
