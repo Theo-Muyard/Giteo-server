@@ -4,6 +4,7 @@
 #include <openssl/rand.h>
 #include <openssl/evp.h>
 #include <time.h>
+#include <limits.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <string.h>
@@ -11,8 +12,8 @@
 #include "core/paths.h"
 #include "log.h"
 #include "fs.h"
-#include "process.h"
 #include "json_store.h"
+#include "user_service.h"
 
 #define SALT_LEN 16
 #define HASH_LEN 64
@@ -84,96 +85,106 @@ static int	hash_password(char *password, char *hex_password, char *hex_salt)
 	return (0);
 }
 
-static int	add_to_json_file(cJSON *root, char *username, char *hex_pasword, char *hex_salt)
+static int	new_user(UserService *users, char *username, char *password, char *salt)
 {
-	cJSON			*_new_user;
 	time_t			_timestamp;
 	char			_uuid[32];
-	char			_path[PATH_MAX];
+	User			*_user;
 
-	giteo_settings_path("users.json", _path);
+	if (NULL == users || NULL == username || NULL == password || NULL == salt)
+		return (1);
+
 	_timestamp = time(NULL);
 	sprintf(_uuid, "%ld", _timestamp);
-	_new_user = cJSON_CreateObject();
-	cJSON_AddStringToObject(_new_user, "username", username);
-	cJSON_AddStringToObject(_new_user, "password", hex_pasword);
-	cJSON_AddStringToObject(_new_user, "salt", hex_salt);
-	cJSON_AddItemToObject(root, _uuid, _new_user);
 
-	json_save(_path, root);
+	users->users = realloc(users->users, (users->count + 1) * sizeof(User));
+	if (NULL == users->users)
+		return (1);
+	_user = &users->users[users->count];
+	_user->_id = strdup(_uuid);
+	_user->username = strdup(username);
+	_user->password = strdup(password);
+	_user->salt = strdup(salt);
+	users->count++;
 	return (0);
 }
 
-static int	check_valid_input(char *input)
+static int	is_valid_input(char *input)
 {
 	if (NULL == input || input[0] == '\0')
-		return (1);
+		return (0);
 
 	while (*input)
 	{
 		if (!isspace((unsigned char)*input))
-			return (0);
-		++input;
-	}
-	return (1);
-}
-
-static int	check_valid_username(cJSON *root, char *username)
-{
-	cJSON			*_user;
-
-	if (check_valid_input(username))
-		return (1);
-
-	cJSON_ArrayForEach(_user, root)
-	{
-		if (0 == strcmp(username, cJSON_GetObjectItem(_user, "username")->valuestring))
 			return (1);
+		++input;
 	}
 	return (0);
 }
 
+static int	is_valid_username(UserService *users, char *username)
+{
+	size_t	_i;
+
+	if (!is_valid_input(username))
+		return (0);
+
+	_i = 0;
+	while (_i < users->count)
+	{
+		if (NULL == users->users[_i].username)
+		{
+			_i++;
+			continue;
+		}
+		if (0 == strcmp(users->users[_i].username, username))
+			return (0);
+		_i++;
+	}
+	return (1);
+}
+
 int	main(void)
 {
+	UserService	*_users;
+
 	char			_username[256];
 	char			_password[256];
 	char			_hex_password[512];
 	char			_hex_salt[512];
 
-	char			*_buffer_content;
-	char			_real_path[PATH_MAX];
-	
-	cJSON			*_root;
+	char			_path[PATH_MAX];
 
-	giteo_settings_path("users.json", _real_path);
-
-	_buffer_content = fs_read_file(_real_path);
-	if (NULL == _buffer_content)
+	giteo_settings_path("users.json", _path);
+	if (!fs_file_exists(_path))
 		return (log_warning("Please setup the system before use this command."), 1);
 
-	_root = cJSON_Parse(_buffer_content);
-	if (NULL == _root)
-		return (log_error("JSON parse failed."), 1);
+	_users = user_service_load();
+	if (NULL == _users)
+		return (user_service_free(_users), log_error("Internal error: Load user service."), 1);
 
 	get_input(_username, sizeof(_username), "Enter a username: ", 0);
 
-	if (check_valid_username(_root, _username))
-		return (log_error("Invalid username. Please try again."), 1);
+	if (!is_valid_username(_users, _username))
+		return (user_service_free(_users), log_error("Invalid username. Please try again."), 1);
 
 	get_input(_password, sizeof(_password), "Enter a password: ", 1);
 	printf("\n");
 
-	if (check_valid_input(_password))
-		return (log_error("Invalid password. Please try again."), 1);
+	if (!is_valid_input(_password))
+		return (user_service_free(_users), log_error("Invalid password. Please try again."), 1);
 
-	if (1 == hash_password(_password, _hex_password, _hex_salt))
-		return(log_error("Internal error: password hashage."), 1);
+	if (hash_password(_password, _hex_password, _hex_salt))
+		return(user_service_free(_users), log_error("Internal error: password hashage."), 1);
+	explicit_bzero(_password, sizeof(_password));
 
-	add_to_json_file(_root, _username, _hex_password, _hex_salt);
+	if (new_user(_users, _username, _hex_password, _hex_salt))
+		return(user_service_free(_users), log_error("Internal error: creating new user."), 1);
+	
+	user_service_save(_users);
 	log_success("User added.");
 
-	explicit_bzero(_password, sizeof(_password));
-	cJSON_Delete(_root);
-	free(_buffer_content);
+	user_service_free(_users);
 	return (0);
 }

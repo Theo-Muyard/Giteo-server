@@ -10,8 +10,7 @@ int	main(int argc, char **argv)
 {
 	if (argc == 1)
 	{
-		log_error("Missing arguments.\n, \
-				Use %sgiteo-server --help%s for more informations.", BLUE, WHITE);
+		log_error("Missing arguments.\nUse %sgiteo-server --help%s for more informations.", BLUE, WHITE);
 		return (1);
 	}
 

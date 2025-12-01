@@ -30,8 +30,7 @@ int		commands_handler(const char *alias, char **argv)
 	if (NULL == _cmd)
 	{	
 		cJSON_Delete(_root);
-		log_error("Command not found.\n , \
-				Use %sgiteo-server --help%s for more informations.", BLUE, WHITE);
+		log_error("Command not found.\nUse %sgiteo-server --help%s for more informations.", BLUE, WHITE);
 		return (1);
 	}
 

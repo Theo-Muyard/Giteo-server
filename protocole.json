@@ -20,14 +20,14 @@
 			"aliases": ["adduser", "--adduser", "addu", "--addu"],
 			"description": "This command registers a new account in the server's configuration database, initializes the user’s directory structure, and prepares the workspace according to your server policies.\nIt ensures the user is properly integrated into the permission system and ready to interact with repositories managed by giteo-server.\nUse this command whenever you want to create a new contributor with access to your local Git environment.",
 			"usage": "giteo-server --adduser",
-			"exec": "commands/adduser"
+			"exec": "commands/add_user"
 		},
 		"removeuser":
 		{
 			"aliases": ["removeuser", "--removeuser", "rmuser", "--rmuser"],
 			"description": "This command deletes the targeted user from the internal database, revokes all associated permissions, and ensures the account no longer has access to repositories managed by giteo-server.\nOptionally, depending on your server's configuration, associated user data or directories may be cleaned up.\nUse this command to safely deauthorize a user from the local Git environment.",
 			"usage": "giteo-server --removeuser <user>",
-			"exec": ""
+			"exec": "commands/remove_user"
 		}
 	}
 }

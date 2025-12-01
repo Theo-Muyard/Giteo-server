@@ -27,12 +27,14 @@ SRC					=	src/main.c \
 						src/core/paths.c \
 						src/core/process.c \
 						src/storage/json_store.c \
+						src/services/user_service.c
 						# ...
 SRC_OBJ				=	$(SRC:src/%.c=$(OBJ_FOLDER)/%.o)
 
 SRC_COMMANDS		=	src/commands/help.c \
-						src/commands/adduser.c \
+						src/commands/add_user.c \
 						src/commands/setup.c \
+						src/commands/remove_user.c \
 						# ...
 COMMANDS			=	$(SRC_COMMANDS:src/commands/%.c=$(BIN_FOLDER)/commands/%)
 COMMANDS_HELPER		=	src/core/fs.c \
@@ -40,6 +42,7 @@ COMMANDS_HELPER		=	src/core/fs.c \
 						src/core/paths.c \
 						src/core/process.c \
 						src/storage/json_store.c \
+						src/services/user_service.c \
 						# ...
 
 all: $(NAME) $(COMMANDS)

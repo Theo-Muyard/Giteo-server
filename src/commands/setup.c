@@ -9,26 +9,26 @@
 #include "process.h"
 #include "core/paths.h"
 
-static int	create_file(char *path)
-{
-	FILE	*_file;
+// static int	create_file(char *path)
+// {
+// 	FILE	*_file;
 
-	_file = fopen(path, "r");
+// 	_file = fopen(path, "r");
 
-	if (NULL != _file)
-	{
-		fclose(_file);
-		return (1);
-	}
+// 	if (NULL != _file)
+// 	{
+// 		fclose(_file);
+// 		return (1);
+// 	}
 
-	_file = fopen(path, "w");
-	if (NULL == _file)
-		return (perror("fopen"), 1);
-	fprintf(_file, "{}");
+// 	_file = fopen(path, "w");
+// 	if (NULL == _file)
+// 		return (perror("fopen"), 1);
+// 	fprintf(_file, "{}");
 	
-	fclose(_file);
-	return (0);
-}
+// 	fclose(_file);
+// 	return (0);
+// }
 
 int	main(void)
 {
@@ -37,24 +37,24 @@ int	main(void)
 
 	giteo_settings_path("users.json", _path);
 	if (!fs_file_exists(_path))
-		create_file(_path);
+		fs_write_file(_path, "{}");
 
 	giteo_settings_path("config.json", _path);
 	if (fs_file_exists(_path))
-		return (log_error("The system is already etablished."), 1);
+		return (log_warning("The system is already etablished."), 1);
 
 	printf("Welcome on our setup system!\nNow, create your first user.\n\n");
-	giteo_bin_path("/commands/adduser", _path);
+	giteo_bin_path("/commands/add_user", _path);
 	if (1 == process_exec(_path, (char **){NULL}))
 	{
-		printf("ERROR\n");
+		giteo_settings_path("users.json", _path);
+		remove(_path);
 		return (1);
 	}
 	giteo_settings_path("config.json", _path);
-	if (1 == create_file(_path))
+	if (1 == fs_write_file(_path, "{}"))
 	{
-		printf("CREATE FILE ERROR \n");
-		return (1);
+		return (log_error("File error."), 1);
 	}
 	log_success("The system has been created or updated successfully.");
 
