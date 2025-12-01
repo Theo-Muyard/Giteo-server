@@ -62,7 +62,7 @@ static void	to_hex(const unsigned char *input, size_t len, char *output)
 	output[len * 2] = '\0';
 }
 
-static int	hash_password(char *password, char *hex_password, char *hex_salt)
+static int	hash_password(char *password, char *password_hash, char *hex_salt)
 {
 	unsigned char	_salt[SALT_LEN];
 	unsigned char	_hash[HASH_LEN];
@@ -80,32 +80,8 @@ static int	hash_password(char *password, char *hex_password, char *hex_salt)
 	))
 		return (log_error("Internal error: PKCS5"), 1);
 
-	to_hex(_hash, sizeof(_hash), hex_password);
+	to_hex(_hash, sizeof(_hash), password_hash);
 	to_hex(_salt, sizeof(_salt), hex_salt);
-	return (0);
-}
-
-static int	new_user(UserService *users, char *username, char *password, char *salt)
-{
-	time_t			_timestamp;
-	char			_uuid[32];
-	User			*_user;
-
-	if (NULL == users || NULL == username || NULL == password || NULL == salt)
-		return (1);
-
-	_timestamp = time(NULL);
-	sprintf(_uuid, "%ld", _timestamp);
-
-	users->users = realloc(users->users, (users->count + 1) * sizeof(User));
-	if (NULL == users->users)
-		return (1);
-	_user = &users->users[users->count];
-	_user->_id = strdup(_uuid);
-	_user->username = strdup(username);
-	_user->password = strdup(password);
-	_user->salt = strdup(salt);
-	users->count++;
 	return (0);
 }
 
@@ -151,8 +127,8 @@ int	main(void)
 
 	char			_username[256];
 	char			_password[256];
-	char			_hex_password[512];
-	char			_hex_salt[512];
+	char			_password_hash[512];
+	char			_salt[512];
 
 	char			_path[PATH_MAX];
 
@@ -162,7 +138,7 @@ int	main(void)
 
 	_users = user_service_load();
 	if (NULL == _users)
-		return (user_service_free(_users), log_error("Internal error: Load user service."), 1);
+		return (log_error("Internal error: Load user service."), 1);
 
 	get_input(_username, sizeof(_username), "Enter a username: ", 0);
 
@@ -175,11 +151,11 @@ int	main(void)
 	if (!is_valid_input(_password))
 		return (user_service_free(_users), log_error("Invalid password. Please try again."), 1);
 
-	if (hash_password(_password, _hex_password, _hex_salt))
+	if (hash_password(_password, _password_hash, _salt))
 		return(user_service_free(_users), log_error("Internal error: password hashage."), 1);
 	explicit_bzero(_password, sizeof(_password));
 
-	if (new_user(_users, _username, _hex_password, _hex_salt))
+	if (user_service_add(_users, _username, _password_hash, _salt))
 		return(user_service_free(_users), log_error("Internal error: creating new user."), 1);
 	
 	user_service_save(_users);

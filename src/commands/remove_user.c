@@ -16,44 +16,22 @@ int	main(int argc, char **argv)
 {
 	(void)argc;
 	UserService	*_users;
-	size_t		_i;
-
-	char			_path[PATH_MAX];
-
-	if (!argv[1])
-		return (log_error("Enter a username."), 1);
+	char		_path[PATH_MAX];
 	
 	giteo_settings_path("users.json", _path);
 	if (!fs_file_exists(_path))
 		return (log_warning("Please setup the system before use this command."), 1);
 
+	if (!argv[1])
+		return (log_error("Enter a username."), 1);
 	_users = user_service_load();
 	if (NULL == _users)
 		return (user_service_free(_users), log_error("Internal error: Load user service."), 1);
 	
-	_i = 0;
-	while (_i < _users->count)
-	{
-		if (_users->users[_i].username)
-		{
-			if (strcmp(_users->users[_i].username, argv[1]) == 0)
-			{
-				free(_users->users[_i]._id);
-				free(_users->users[_i].username);
-				free(_users->users[_i].password);
-				free(_users->users[_i].salt);
-				_users->users[_i]._id = NULL;
-				_users->users[_i].username = NULL;
-				_users->users[_i].password = NULL;
-				_users->users[_i].salt = NULL;
-				user_service_save(_users);
-				user_service_free(_users);
-				return (log_success("User removed."), 0);
-			}
-		}
-		_i++;
-	}
-	log_error("User not found.");
+	if (user_service_delete(_users, argv[1]))
+		return (user_service_free(_users),log_error("User not found."), 1);
+	user_service_save(_users);
+	log_success("User removed.");
 	user_service_free(_users);
-	return (1);
+	return (0);
 }
